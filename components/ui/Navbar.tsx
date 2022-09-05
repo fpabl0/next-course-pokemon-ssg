@@ -27,7 +27,7 @@ export const Navbar = () => {
       <Link href="/">
         <UILink>
           <Text color='white' h2>P</Text>
-          <Text color='white' h3>okémon</Text>
+          <Text color='white' h3>okémon!</Text>
         </UILink>
       </Link>
 
