@@ -12,7 +12,7 @@ type Params = {
   id: string;
 };
 
-export const getStaticPaths: GetStaticPaths<Params> = async (ctx) => {
+export const getStaticPaths: GetStaticPaths<Params> = async () => {
   const pokemonIds = [...Array(151)].map((v, index) => {
     return `${index + 1}`;
   });
@@ -20,14 +20,27 @@ export const getStaticPaths: GetStaticPaths<Params> = async (ctx) => {
     paths: pokemonIds.map(id => ({
       params: { id }
     })),
-    fallback: false,
+    fallback: 'blocking',
   };
 };
 
 export const getStaticProps: GetStaticProps<Props, Params> = async (ctx) => {
   const { id } = ctx.params!;
   const info = await getPokemonInfo(id);
-  return { props: { ...info } };
+
+  if (!info) {
+    return {
+      redirect: {
+        destination: '/',
+        permanent: false,
+      }
+    };
+  }
+
+  return {
+    props: { ...info },
+    revalidate: 86400, // 60 * 60 * 24
+  };
 };
 
 // ===============================================================

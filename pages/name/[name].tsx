@@ -10,21 +10,33 @@ type Params = {
   name: string;
 };
 
-export const getStaticPaths: GetStaticPaths<Params> = async (ctx) => {
+export const getStaticPaths: GetStaticPaths<Params> = async () => {
   const { data } = await pokeApi.get<PokemonListResponse>('/pokemon?limit=151');
   const names = data.results.map(p => p.name);
   return {
     paths: names.map(n => ({
       params: { name: n }
     })),
-    fallback: false,
+    fallback: 'blocking',
   };
 };
 
 export const getStaticProps: GetStaticProps<Props, Params> = async (ctx) => {
   const { name } = ctx.params!;
   const info = await getPokemonInfo(name);
-  return { props: { ...info } };
+
+  if (!info) {
+    return {
+      redirect: {
+        destination: '/',
+        permanent: false,
+      }
+    };
+  }
+  return {
+    props: { ...info },
+    revalidate: 86400, // 60 * 60 * 24
+  };
 };
 
 
